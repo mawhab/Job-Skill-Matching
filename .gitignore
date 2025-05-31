@@ -1,0 +1,4 @@
+talentclef25_evaluation_script
+weights/*
+__pycache__
+*.pyc

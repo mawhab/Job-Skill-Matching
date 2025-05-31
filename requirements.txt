@@ -1,0 +1,7 @@
+tqdm
+torch
+numpy
+pandas
+transformers
+bitsandbytes
+sentence_transformers
