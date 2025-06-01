@@ -40,7 +40,7 @@ DESC_E5_INSTRUCT_PROMPT = 'Given a job title and its description, retrieve relev
 NO_DESC_E5_INSTRUCT_PROMPT = 'Given a job title, retrieve relevant skills.'
 
 EVALUATION_SCRIPT = 'talentclef25_evaluation_script/talentclef_evaluate.py'
-QRELS_FILE = 'data/task_data/validation/qrels.txt'
+QRELS_FILE = 'data/task_data/validation/qrels.tsv'
 RUN_FILE = 'data/evaluation/validation_pred.trec'
 
 EXPERIMENT_NAME = 'Team_B_exp'
