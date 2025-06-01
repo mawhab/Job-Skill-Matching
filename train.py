@@ -73,9 +73,6 @@ if __name__ == "__main__":
     print(f"Number of training steps: {num_training_steps}, Warmup steps: {num_warmup_steps}")
     print(f"Gradient accumulation steps: {gradient_accumulation_steps}")
     print(f"Batch size: {args.batch_size}, Learning rate: {args.lr}, Model name: {args.model_name}, Augmentation: {args.augmentation}")
-    encoder.eval()
-    formatter.set_context('val')
-    validation_mAP = get_validation_mAP(encoder, tokenizer, formatter, device)
     for epoch in range(args.epochs):
         encoder.train()
         formatter.set_context('train')
