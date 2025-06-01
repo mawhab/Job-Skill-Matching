@@ -133,6 +133,8 @@ class ValTrainJobMatcher:
 
     @classmethod
     def get_job_matches(cls, job, n=1, cutoff=0.97):
+        if not cls.val_jobs or not cls.train_jobs or not cls.sim_matrix:
+            cls.initialize()
         job_index = cls.val_jobs.index(job)
         sim = cls.sim_matrix[job_index].squeeze()
         matches = np.argsort(-sim)[:n]
