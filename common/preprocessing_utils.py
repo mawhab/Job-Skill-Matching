@@ -70,20 +70,21 @@ class ValidationData:
         cls.corpus_texts = cls.corpus.skill_aliases.to_list()
         cls.queries_ids = cls.queries.q_id.to_list()
         cls.corpus_ids = cls.corpus.c_id.to_list()
-        cls.map_queries = dict(zip(cls.queries.q_id.to_list(), cls.queries.jobtitle.to_list()))
-        cls.map_corpus = dict(zip(cls.corpus.skill_aliases.to_list(), cls.corpus.c_id.to_list()))
+        cls.map_queries = dict(zip(cls.queries_ids, cls.queries_texts))
+        cls.map_corpus = dict(zip(cls.corpus_texts, cls.corpus_ids))
+        cls.corpus_link_map = dict(zip(cls.corpus_texts, cls.corpus.esco_uri.to_list()))
 
     @classmethod
     def get_queries_texts(cls):
         if cls.queries is None:
             cls.initialize()
-        return cls.queries
+        return cls.queries_texts
 
     @classmethod
     def get_corpus_texts(cls):  
         if cls.corpus is None:
             cls.initialize()
-        return cls.corpus
+        return cls.corpus_texts
     
     @classmethod
     def get_queries_ids(cls):
@@ -109,6 +110,12 @@ class ValidationData:
             cls.initialize()
         return cls.map_corpus
     
+    @classmethod
+    def get_corpus_link(cls, skill):
+        if cls.corpus is None:
+            cls.initialize()
+        return cls.corpus_link_map[skill]
+
 
 class ValTrainJobMatcher:
     query_embedding = None
@@ -132,6 +139,7 @@ class ValTrainJobMatcher:
         return [cls.train_jobs[i] for i in matches if sim[i] > cutoff]
     
 class InputFormatter:
+    context = None
     job_template = None
     skill_template = None
     job_descriptions = None
@@ -157,9 +165,18 @@ class InputFormatter:
 
     @classmethod
     def format_skill(cls, skill):
-        desc = cls.skill_descriptions[skill]
+        skill_link = cls.get_skill_link(skill)
+        desc = cls.skill_descriptions[skill_link]
         return cls.skill_template.format(skill=skill, desc=desc)
     
+    @classmethod
+    def get_skill_link(cls, skill):
+        if cls.context == 'train':
+            skill_link = IdToName.get_skill_id(skill)
+        else:
+            skill_link = ValidationData.get_corpus_link(skill)
+        return skill_link
+
     @classmethod
     def set_context(cls, context):
         pass
@@ -233,11 +250,13 @@ def get_formatter(augmentation):
 class IdToName:
     jobid2name = None
     skillid2name = None
+    skillname2id = None
 
     @classmethod
     def initialize(cls):
         cls.get_jobid2name()
         cls.get_skillid2name()
+        cls.skillname2id = {name: skill_id for skill_id, names in cls.skillid2name.items() for name in names}
 
     @classmethod
     def get_jobid2name(cls, path=defaults.JOBID2NAME):
@@ -267,12 +286,14 @@ class IdToName:
             cls.initialize()
         return cls.skillid2name[skillid]
 
+    @classmethod
+    def get_skill_id(cls, skill_name):
+        if cls.skillname2id is None:
+            cls.initialize()
+        return cls.skillname2id[skill_name]
+
 def get_skill_descriptions():
     skill_link_desc = {}
     for row in pd.read_csv(defaults.ESCO_SKILLS_DF).itertuples():
-        if type(row.altLabels) is float:
-            skill_link_desc[row.preferredLabel] = row.description
-        else:
-            for alias in [row.preferredLabel] + row.altLabels.split('\n'):
-                skill_link_desc[alias] = row.description
+            skill_link_desc[row.conceptUri] = row.description
     return skill_link_desc

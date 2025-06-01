@@ -8,7 +8,7 @@ from common.dataset import MultiNDataset
 from torch.nn.utils import clip_grad_norm_
 from common.evaluation_utils import get_validation_mAP
 from transformers import get_linear_schedule_with_warmup
-from common.model_utils import  get_model, average_pool, calculate_mnrl_loss
+from common.model_utils import  get_model, average_pool, calculate_mnrl_loss, JobBERTEncoder
 from common.preprocessing_utils import get_formatter, get_train_data, get_templates, custom_collate_fn
 
 def get_args():
@@ -51,6 +51,10 @@ if __name__ == "__main__":
     collate_wrapper = partial(custom_collate_fn, tokenizer=tokenizer, max_length=256)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_wrapper)
 
+    if args.augmentation == 'esco':
+        print('Downloading JobBERT weights...')
+        JobBERTEncoder.initialize(device=device)
+
     optim = AdamW(encoder.parameters(), lr=args.lr, betas=betas)
     num_training_steps = (len(train_loader) * args.epochs) // gradient_accumulation_steps
     num_warmup_steps = int(args.warmup * num_training_steps)  # 6% warmup
@@ -69,6 +73,9 @@ if __name__ == "__main__":
     print(f"Number of training steps: {num_training_steps}, Warmup steps: {num_warmup_steps}")
     print(f"Gradient accumulation steps: {gradient_accumulation_steps}")
     print(f"Batch size: {args.batch_size}, Learning rate: {args.lr}, Model name: {args.model_name}, Augmentation: {args.augmentation}")
+    encoder.eval()
+    formatter.set_context('val')
+    validation_mAP = get_validation_mAP(encoder, tokenizer, formatter, device)
     for epoch in range(args.epochs):
         encoder.train()
         formatter.set_context('train')
@@ -103,7 +110,7 @@ if __name__ == "__main__":
         
         encoder.eval()
         formatter.set_context('val')
-        validation_mAP = get_validation_mAP(encoder, tokenizer, formatter)
+        validation_mAP = get_validation_mAP(encoder, tokenizer, formatter, device)
         
         # print(f'Epoch {epoch+1} finished. Train loss: {avg_epoch_loss}, Validation mAP: {validation_mAP}')
         if validation_mAP>best_val_mAP:

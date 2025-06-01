@@ -5,13 +5,13 @@ from common.model_utils import get_embeddings
 from sentence_transformers.util import cos_sim
 from common.preprocessing_utils import ValidationData
 
-def get_validation_mAP(encoder, tokenizer, formatter):
+def get_validation_mAP(encoder, tokenizer, formatter, device):
     queries_texts = ValidationData.get_queries_texts()
     corpus_texts = ValidationData.get_corpus_texts()
     jobs = [formatter.format_job(j) for j in queries_texts]
     skills = [formatter.format_skill(s) for s in corpus_texts]
-    job_embeddings = get_embeddings(jobs, encoder=encoder, tokenizer=tokenizer, max_length=128, token='mean', batch_size=64)
-    skill_embeddings = get_embeddings(skills, encoder=encoder, tokenizer=tokenizer, max_length=128, token='mean', batch_size=64)
+    job_embeddings = get_embeddings(jobs, encoder=encoder, tokenizer=tokenizer, max_length=128, token='mean', batch_size=64, device=device)
+    skill_embeddings = get_embeddings(skills, encoder=encoder, tokenizer=tokenizer, max_length=128, token='mean', batch_size=64, device=device)
     similarities = cos_sim(job_embeddings, skill_embeddings).cpu().numpy()
     return get_mAP(similarities)
 
