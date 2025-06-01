@@ -197,7 +197,7 @@ class ESCOInputFormatter(InputFormatter):
 
     @classmethod
     def load_job_descriptions(cls):
-        job_name_desc = {}
+        cls.job_descriptions = {}
         df = pd.read_csv(defaults.ESCO_JOBS_DF).fillna('')
         for row in df.itertuples():
             aliases = [row.preferredLabel]
@@ -206,7 +206,7 @@ class ESCOInputFormatter(InputFormatter):
             if row.hiddenLabels:
                 aliases.extend(row.hiddenLabels.split('\n'))
             for alias in aliases:
-                job_name_desc[alias] = row.description
+                cls.job_descriptions[alias] = row.description
     
     @classmethod
     def format_job(cls, job):
