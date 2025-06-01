@@ -109,7 +109,7 @@ if __name__ == "__main__":
         formatter.set_context('val')
         validation_mAP = get_validation_mAP(encoder, tokenizer, formatter, device)
         
-        # print(f'Epoch {epoch+1} finished. Train loss: {avg_epoch_loss}, Validation mAP: {validation_mAP}')
+        print(f'Epoch {epoch+1} finished. Train loss: {avg_epoch_loss}, Validation mAP: {validation_mAP}')
         if validation_mAP>best_val_mAP:
             torch.save({'mAP': validation_mAP, 'weights': encoder.state_dict()}, f'weights/best_model_{args.model_name}_{args.augmentation}_mAP.pt')
             best_val_mAP = validation_mAP
