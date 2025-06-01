@@ -198,9 +198,14 @@ class ESCOInputFormatter(InputFormatter):
     @classmethod
     def load_job_descriptions(cls):
         job_name_desc = {}
-        df = pd.read_csv(defaults.ESCO_JOBS_DF)
+        df = pd.read_csv(defaults.ESCO_JOBS_DF).fillna('')
         for row in df.itertuples():
-            for alias in row.aliases.split('\n'):
+            aliases = [row.preferredLabel]
+            if row.altLabels:
+                aliases.extend(row.altLabels.split('\n'))
+            if row.hiddenLabels:
+                aliases.extend(row.hiddenLabels.split('\n'))
+            for alias in aliases:
                 job_name_desc[alias] = row.description
     
     @classmethod
@@ -237,6 +242,7 @@ class LLMInputFormatter(InputFormatter):
 
     @classmethod
     def set_context(cls, context):
+        cls.context = context
         cls.job_descriptions = cls.all_job_descriptions[context]
 
 def get_formatter(augmentation):
