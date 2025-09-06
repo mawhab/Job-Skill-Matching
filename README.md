@@ -1,6 +1,6 @@
 # TalentCLEF 2025 Job-Skill Matching
 
-This repository contains code for the TalentCLEF 2025 Task B challenge - matching job titles with relevant skills using transformer-based approaches. The system uses various pre-trained language models with different description augmentation strategies.
+This repository contains code for the TalentCLEF 2025 Task B challenge - matching job titles with relevant skills using transformer-based approaches. The system uses various pre-trained language models with different description augmentation strategies. [Working notes paper link](https://www.dei.unipd.it/~faggioli/temp/clef2025/paper_363.pdf).
 
 ## Project Structure
 
